@@ -11,6 +11,14 @@ class TestTask(unittest.TestCase):
         ax = task.a @ task.x
         assert_allclose(ax, task.b, rtol=1e-6, atol=1e-8)
 
+    def test_serialization(self):
+        a = Task(identifier=1, size=10)
+        # serialize
+        txt = a.to_json()
+        # deserialize
+        b = Task.from_json(txt)
+        self.assertEqual(a, b)
+
 
 if __name__ == "__main__":
     unittest.main()

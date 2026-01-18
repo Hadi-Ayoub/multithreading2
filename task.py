@@ -1,6 +1,6 @@
 import time
-
 import numpy as np
+import json
 
 
 class Task:
@@ -19,3 +19,40 @@ class Task:
         start = time.perf_counter()
         self.x = np.linalg.solve(self.a, self.b)
         self.time = time.perf_counter() - start
+
+    def to_json(self) -> str:
+        data = {
+            "identifier": self.identifier,
+            "size": self.size,
+            # numpy arrays are not JSON serializable, so we convert them to lists
+            "a": self.a.tolist(),
+            "b": self.b.tolist(),
+            "x": self.x.tolist(),
+            "time": self.time,
+        }
+
+        return json.dumps(data)
+
+    @staticmethod
+    def from_json(text: str) -> "Task":
+        data = json.loads(text)
+        task = Task(data["identifier"], data["size"])
+        task.a = np.array(data["a"])
+        task.b = np.array(data["b"])
+        task.x = np.array(data["x"])
+        task.time = data["time"]
+
+        return task
+
+    def __eq__(self, other: "Task") -> bool:
+        if other is None:
+            return False
+
+        if self.identifier != other.identifier or self.size != other.size:
+            return False
+
+        return (
+            np.array_equal(self.a, other.a)
+            and np.array_equal(self.b, other.b)
+            and np.array_equal(self.x, other.x)
+        )
