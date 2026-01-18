@@ -3,17 +3,7 @@ Ce projet implémente une architecture de calcul distribué permettant de résou
 
 ## Architecture du Projet
 
-Le système final (TP4) repose sur une architecture modulaire en 4 composants :
-
-```mermaid
-    Boss(Client Python) -- "Matrice (Task)" --> Manager(QueueManager)
-    Manager -- "Pickle (Queue)" --> MinionPy(Worker Python)
-    Manager -- "JSON (HTTP)" --> Proxy(Passerelle HTTP)
-    Proxy -- "GET / POST" --> MinionCpp(Worker C++)
-
-```
-
-**Composants** :
+Le système final repose sur une architecture modulaire en 4 composants :
 
 - **Manager** : Serveur central qui stocke les tâches et résultats via `multiprocessing.managers`.
 - **Boss** : Client qui génère les tâches (matrices aléatoires).
@@ -24,12 +14,12 @@ Le système final (TP4) repose sur une architecture modulaire en 4 composants :
 
 ## Analyse des Performances (Benchmarks)
 
-Les tests comparent le temps de calcul pur (en moyenne) pour résoudre un système linéaire selon la taille de la matrice N×N.
+Les tests comparent le temps de calcul pur (en moyenne) pour résoudre un système linéaire selon la taille de la matrice N×N sans intégrer le temps des traitements I/O.
 
-| Taille Matrice (N) | Python (NumPy) | C++ (Eigen Release) | Vainqueur (Calcul Pur) |
+| Taille Matrice (N) | Python (NumPy) | C++ (Eigen Release) | Vainqueur |
 |--------------------|----------------|---------------------|------------------------|
 | N = 100 | ~0.0008s | ~0.0001s | C++ (8x plus vite) |
-| N = 1000 | ~0.0150s | ~0.0200s |  Égalité |
+| N = 1000 | ~0.0150s | ~0.0200s |  numpy légèrement supérieur |
 | N = 5000 | ~0.5300s | ~1.4000s |  Python (NumPy) |
 
 ###  Conclusions Techniques
@@ -41,7 +31,7 @@ Les tests comparent le temps de calcul pur (en moyenne) pour résoudre un systè
 
 2. **Calcul Pur & Multithreading** :
    - NumPy utilise des bibliothèques (BLAS/MKL) qui parallélisent automatiquement le calcul sur tous les cœurs du CPU.
-   - C++ (Eigen) est exécuté ici en mono-thread. Bien que très rapide intrinsèquement (0.02s de calcul pur pour N=1000), il est désavantagé sur les très grosses matrices.
+   - C++ (Eigen) est exécuté ici en mono-thread. Bien que très rapide intrinsèquement , il est désavantagé sur les très grosses matrices.
 
 3. **Latence vs Débit** :
    - Sur de petites tâches (N=100), l'architecture HTTP/C++ est pénalisée par la latence réseau (Handshake TCP, headers HTTP). Python (local) est immédiat grâce à la mémoire partagée.
@@ -52,14 +42,13 @@ Les tests comparent le temps de calcul pur (en moyenne) pour résoudre un systè
 
 ### Outils nécessaires
 
-- **Système** : Linux / MacOS (recommandé)
 - **Python** : 3.10 ou supérieur
-- **C++** : CMake (3.14+) et un compilateur compatible C++17 (GCC/Clang).
+- **C++** : CMake (3.14+) et un compilateur compatible C++17.
 - **uv** : Gestionnaire de package Python rapide.
 
 ### Installation
 
-1. **Installer uv** (si absent) :
+1. **Installer uv**  :
    ```bash
    curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
